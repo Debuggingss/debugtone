@@ -20,6 +20,7 @@ If you hold down the "7" key it will walk until you release the button. (No need
 
 
 WARNING: this is a proof of concept, It's horrible... Like seriously. It uses built in Minecraft pathfinding so it does things like this:
+
 ![image](https://user-images.githubusercontent.com/55459283/119272637-37175100-bc07-11eb-9095-7543d4d44e2d.png)
 ![image](https://user-images.githubusercontent.com/55459283/119272642-3d0d3200-bc07-11eb-85c4-043e27a68c7d.png)
 
