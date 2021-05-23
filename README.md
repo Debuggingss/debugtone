@@ -6,6 +6,8 @@ ChatTriggers: http://chattriggers.com/
 
 Might turn this into a library in the future so you can integrate a shitty pathfinder API in your own module.
 
+**Please do not use this for botting on Hypixel. You WILL get banned.**
+
 Commands:
 
 - `/debugtone pathto <x> <y> <z>` - Finds path to a point (must be in 2000 block range, you can edit this in the file as there is no config)
@@ -22,4 +24,4 @@ WARNING: this is a proof of concept, It's horrible... Like seriously. It uses bu
 ![image](https://user-images.githubusercontent.com/55459283/119272642-3d0d3200-bc07-11eb-85c4-043e27a68c7d.png)
 
 
-Please do not use this for botting on Hypixel. You WILL be banned.
+**Please do not use this for botting on Hypixel. You WILL get banned.**
