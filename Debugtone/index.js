@@ -196,37 +196,38 @@ register('command', (cmd, x, y, z) => {
                         parseFloat(y),
                         parseFloat(z)
                     );
-                    ChatLib.chat(`§5[§dDebugtone§5] §7ok. pathing to ${x} ${y} ${z}`);
+                    ChatLib.simulateChat(`§5[§dDebugtone§5] §7ok. pathing to ${x} ${y} ${z}`);
                 } catch(e) { } // idc abt number error bs. just dont enter fucking numbers
             }
             break;
         case "clear":
             currentUserPath = [];
-            ChatLib.chat(`§5[§dDebugtone§5] §7ok. cleared path`);
+            ChatLib.simulateChat(`§5[§dDebugtone§5] §7ok. cleared path`);
             break;
         case "label":
             toggleLabel = !toggleLabel;
-            ChatLib.chat(`§5[§dDebugtone§5] §7set rendering point labels to ${toggleLabel.toString().toUpperCase()}`);
+            ChatLib.simulateChat(`§5[§dDebugtone§5] §7set rendering point labels to ${toggleLabel.toString().toUpperCase()}`);
             break;
         case "go":
+            if(currentUserPath === undefined) return;
             if(currentUserPath.length === 0) {
-                ChatLib.chat(`§5[§dDebugtone§5] §7specify a path first by doing /debugtone pathto x y z`);
+                ChatLib.simulateChat(`§5[§dDebugtone§5] §7specify a path first by doing /debugtone pathto x y z`);
                 break;
             }
             if(!autoWalk) {
                 autoWalk = true;
-                ChatLib.chat(`§5[§dDebugtone§5] §7going`);
+                ChatLib.simulateChat(`§5[§dDebugtone§5] §7going`);
             } else if(autoWalk) {
-                ChatLib.chat(`§5[§dDebugtone§5] §7already going idiot`);
+                ChatLib.simulateChat(`§5[§dDebugtone§5] §7already going idiot`);
             }
             break;
         case "stop":
             if(autoWalk) {
                 autoWalk = false;
                 stopAllMovement();
-                ChatLib.chat(`§5[§dDebugtone§5] §7stopped`);
+                ChatLib.simulateChat(`§5[§dDebugtone§5] §7stopped`);
             } else {
-                ChatLib.chat(`§5[§dDebugtone§5] §7nothing to stop idiot`);
+                ChatLib.simulateChat(`§5[§dDebugtone§5] §7nothing to stop idiot`);
             }
             break;
     }
@@ -239,12 +240,13 @@ register('tick', () => {
         if(autoWalk && walkTask) {
             autoWalk = false;
             currentUserPath = [];
-            ChatLib.chat(`§5[§dDebugtone§5] §7arrived.`);
+            ChatLib.simulateChat(`§5[§dDebugtone§5] §7arrived.`);
         }
     }
 });
 
 register('renderWorld', () => {
+    if(currentUserPath === undefined) return;
     if(currentUserPath.length <= 1) return;
 
     currentUserPath.forEach((point, index) => {
@@ -256,7 +258,7 @@ register('renderWorld', () => {
 
         if(point !== currentUserPath[currentUserPath.length - 1]) {
             disableGlShit();
-            
+
             Tessellator.begin(1)
             .colorize(renderColor[0], renderColor[1], renderColor[2], 1)
             .pos(
