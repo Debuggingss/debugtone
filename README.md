@@ -15,6 +15,7 @@ Commands:
 - `/debugtone label` - Mainly a command used for debugging but all it does is show "Point *n*" above every point in the path.
 - `/debugtone go` - Starts walking towards the goal following the path, there is a freelook like in baritone so you can look in any direction while it does its thing.
 - `/debugtone stop` - Stops walking
+- `/debugtone rotmode` - Instead of navigating with WASD, it only holds down W and changes your yaw to walk forwards. (Doesn't touch pitch)
 
 If you hold down the "7" key it will walk until you release the button. (No need to do `/debugtone go` in order to use this). I didn't even remember this exists so it might not even work.
 
