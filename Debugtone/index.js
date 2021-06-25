@@ -30,6 +30,7 @@ let currentUserPath = [];
 
 let autoWalk = false;
 let toggleLabel = false;
+let rotmode = false;
 let renderColor = [1, 0, 0];
 
 const stopAllMovement = () => {
@@ -146,6 +147,41 @@ const getBind = (dir, pn, yaw) => {
     }
 }
 
+const getEyePos = () => {
+    return {
+        x:Player.getX(),
+        y:Player.getY() + Player.getPlayer().func_70047_e(),
+        z:Player.getZ()
+    };
+}
+
+/* Not my code that's why its ugly sorry */
+let lookAtBlock = (blockPos, playerPos) => {
+    if (!playerPos) playerPos = getEyePos();
+    let d = {
+        x:blockPos.x - playerPos.x,
+        y:blockPos.y - playerPos.y,
+        z:blockPos.z - playerPos.z
+    };
+    let yaw = 0;
+
+    if (d.x != 0) {
+        d.x < 0 ? yaw = 1.5 * Math.PI : yaw = 0.5 * Math.PI;
+        yaw = yaw - Math.atan(d.z / d.x);
+    } else if (d.z < 0) yaw = Math.PI;
+
+    d.xz = Math.sqrt(Math.pow(d.x, 2) + Math.pow(d.z, 2));
+
+    pitch = -Math.atan(d.y / d.xz);
+    yaw = -yaw * 180 / Math.PI;
+
+    setYaw(yaw);
+}
+
+const setYaw = (yaw) => {
+    Player.getPlayer().field_70177_z = yaw;
+}
+
 const walkOn = (pointsOfPath) => {
     const currX = Math.round(Player.getX() * 10) / 10;
     const currY = Math.round(Player.getY() * 10) / 10;
@@ -155,14 +191,19 @@ const walkOn = (pointsOfPath) => {
     let closest = null;
 
     let nextPoint = null;
+    let nextNextPoint = null;
 
     pointsOfPath.forEach(point => {
         let currentDist = calculateDistance(currX, currY, currZ, point.x, point.y, point.z);
         if (currentDist <= previous) {
             previous = currentDist;
             closest = point;
-            if(pointsOfPath.indexOf(point) !== pointsOfPath.length -1) {
+            if(pointsOfPath.indexOf(point) !== pointsOfPath.length - 1) {
                 nextPoint = pointsOfPath[pointsOfPath.indexOf(point) + 1];
+            }
+
+            if(pointsOfPath.indexOf(point) !== pointsOfPath.length - 2) {
+                nextNextPoint = pointsOfPath[pointsOfPath.indexOf(point) + 2];
             }
         }
     });
@@ -172,10 +213,19 @@ const walkOn = (pointsOfPath) => {
         if(closest === pointsOfPath[pointsOfPath.length - 1]) return true;
         const currYaw = Math.floor(Player.getYaw());
         
-        if(currX !== nextPoint.x && currX < nextPoint.x) getBind("X", "P", currYaw);
-        if(currX !== nextPoint.x && currX > nextPoint.x) getBind("X", "N", currYaw);
-        if(currZ !== nextPoint.z && currZ < nextPoint.z) getBind("Z", "P", currYaw);
-        if(currZ !== nextPoint.z && currZ > nextPoint.z) getBind("Z", "N", currYaw);
+        if(!rotmode) {
+            if(currX !== nextPoint.x && currX < nextPoint.x) getBind("X", "P", currYaw);
+            if(currX !== nextPoint.x && currX > nextPoint.x) getBind("X", "N", currYaw);
+            if(currZ !== nextPoint.z && currZ < nextPoint.z) getBind("Z", "P", currYaw);
+            if(currZ !== nextPoint.z && currZ > nextPoint.z) getBind("Z", "N", currYaw);
+        } else {
+            forwardBind.setState(true);
+            lookAtBlock({
+                x: nextNextPoint.x,
+                y: nextNextPoint.y,
+                z: nextNextPoint.z
+            });
+        }
 
         if(closest.y + 1 === nextPoint.y || Math.round(Player.getY()) + 1.5 === nextPoint.y) jumpBind.setState(true);
         return false;
@@ -209,7 +259,6 @@ register('command', (cmd, x, y, z) => {
             ChatLib.simulateChat(`§5[§dDebugtone§5] §7set rendering point labels to ${toggleLabel.toString().toUpperCase()}`);
             break;
         case "go":
-            if(currentUserPath === undefined) return;
             if(currentUserPath.length === 0) {
                 ChatLib.simulateChat(`§5[§dDebugtone§5] §7specify a path first by doing /debugtone pathto x y z`);
                 break;
@@ -230,6 +279,10 @@ register('command', (cmd, x, y, z) => {
                 ChatLib.simulateChat(`§5[§dDebugtone§5] §7nothing to stop idiot`);
             }
             break;
+        case "rotmode":
+            rotmode = !rotmode;
+            ChatLib.simulateChat(`§5[§dDebugtone§5] §7set rotation mode to ${rotmode.toString().toUpperCase()}`);
+            break;
     }
     
 }).setName("debugtone");
@@ -248,7 +301,7 @@ register('tick', () => {
 register('renderWorld', () => {
     if(currentUserPath === undefined) return;
     if(currentUserPath.length <= 1) return;
-
+    
     currentUserPath.forEach((point, index) => {
         if(toggleLabel) {
             disableGlShit();
@@ -258,7 +311,7 @@ register('renderWorld', () => {
 
         if(point !== currentUserPath[currentUserPath.length - 1]) {
             disableGlShit();
-
+            
             Tessellator.begin(1)
             .colorize(renderColor[0], renderColor[1], renderColor[2], 1)
             .pos(
