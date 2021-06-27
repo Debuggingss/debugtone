@@ -172,7 +172,6 @@ let lookAtBlock = (blockPos, playerPos) => {
 
     d.xz = Math.sqrt(Math.pow(d.x, 2) + Math.pow(d.z, 2));
 
-    pitch = -Math.atan(d.y / d.xz);
     yaw = -yaw * 180 / Math.PI;
 
     setYaw(yaw);
@@ -180,6 +179,22 @@ let lookAtBlock = (blockPos, playerPos) => {
 
 const setYaw = (yaw) => {
     Player.getPlayer().field_70177_z = yaw;
+}
+
+const distFormula = (x1, y1, z1, x2, y2, z2) => {
+    return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2 + (z2 - z1) ** 2);
+}
+
+const getSpeed = () => {
+    const lastX = new Entity(Player.getPlayer()).getLastX();
+    const lastY = new Entity(Player.getPlayer()).getLastY();
+    const lastZ = new Entity(Player.getPlayer()).getLastZ();
+
+    const currentX = Player.getX();
+    const currentY = Player.getY();
+    const currentZ = Player.getZ();
+
+    return Math.round(20 * distFormula(lastX, lastY, lastZ, currentX, currentY, currentZ) * 10) / 10;
 }
 
 const walkOn = (pointsOfPath) => {
@@ -281,15 +296,26 @@ register('command', (cmd, x, y, z) => {
             break;
         case "rotmode":
             rotmode = !rotmode;
-            ChatLib.simulateChat(`§5[§dDebugtone§5] §7set rotation mode to ${rotmode.toString().toUpperCase()}`);
+            ChatLib.simulateChat(`§5[§dDebugtone§5] §7set rotation mode to §8${rotmode.toString().toUpperCase()}`);
             break;
     }
     
 }).setName("debugtone");
 
+let infractions = 0;
+
 register('tick', () => {
     if(WalkBind.isKeyDown() || autoWalk) {
         let walkTask = walkOn(currentUserPath);
+        if(autoWalk && !walkTask && getSpeed() === 0) {
+            infractions++;
+            if(infractions >= 100) {
+                jumpBind.setState(true);
+                if(infractions >= 140) {
+                    infractions = 0;
+                }
+            }
+        }
         if(autoWalk && walkTask) {
             autoWalk = false;
             currentUserPath = [];
@@ -350,4 +376,35 @@ const enableGlShit = () => {
 	GL11.glEnable(GL11.GL_TEXTURE_2D);
 	GL11.glDepthMask(true);
 	GL11.glDisable(GL11.GL_BLEND);
+};
+
+const getCurrentPath = () => {
+    return currentUserPath;
+}
+
+const setCurrentPath = (toSet) => {
+    currentUserPath = toSet;
+}
+
+const getAutoWalkStatus = () => {
+    return autoWalk;
+}
+
+const setAutoWalkStatus = (boolean) => {
+    autoWalk = boolean;
+}
+
+/* Exports for API Usage */
+export {
+    Point,
+    pathTo,
+    walkOn,
+    getCurrentPath,
+    setCurrentPath,
+    getAutoWalkStatus,
+    setAutoWalkStatus,
+    getEyePos,
+    lookAtBlock,
+    setYaw,
+    getBlockAtPoint
 };
